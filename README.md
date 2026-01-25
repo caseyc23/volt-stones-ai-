@@ -1,3 +1,9 @@
+# ⚡ VOLT - Stones AI Watch
+
+> _I want to explore the use of technology to support my son in his athletic pursuits, providing him with guidance and encouragement in sports. I also hope to convey just how much he means to me, particularly during those moments when I can't be by his side._
+
+---
+
 # ⚡ VOLT v5.00 - WiFi Manager & API Edition
 
 **Welcome to VOLT v5.00!** This firmware adds comprehensive WiFi management and API capabilities to your VOLT watch.
