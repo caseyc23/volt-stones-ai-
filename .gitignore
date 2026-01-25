@@ -1,0 +1,30 @@
+# IDE and Editor directories
+.vscode/
+.history/
+.idea/
+
+# OS generated files
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# Build artifacts
+*.o
+*.elf
+*.bin
+*.hex
+
+# Temporary files
+*.tmp
+*.bak
+*~
+
+# Python cache
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+.Python
+
+# Log files
+*.log

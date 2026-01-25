@@ -1,0 +1,124 @@
+{
+  "name": "VOLT-AI-Watch",
+  "version": "5.0.0",
+  "description": "Professional AI companion watch firmware for ESP32-S3 with GPT-4 integration, WiFi management, voice recognition, and child safety features",
+  "keywords": [
+    "esp32",
+    "ai",
+    "watch",
+    "gpt4",
+    "openai",
+    "voice",
+    "kids",
+    "wearable",
+    "iot",
+    "wifi"
+  ],
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/yourusername/volt-ai-watch.git"
+  },
+  "authors": [
+    {
+      "name": "Dad",
+      "email": "dad@example.com",
+      "maintainer": true
+    }
+  ],
+  "license": "MIT",
+  "homepage": "https://github.com/yourusername/volt-ai-watch",
+  "frameworks": "arduino",
+  "platforms": "espressif32",
+  "headers": [
+    "ota_update.h",
+    "power_management.h",
+    "watchdog.h"
+  ],
+  "dependencies": [
+    {
+      "name": "ArduinoJson",
+      "version": "^6.21.0"
+    },
+    {
+      "name": "Adafruit GFX Library",
+      "version": "^1.11.0"
+    },
+    {
+      "name": "Adafruit SSD1306",
+      "version": "^2.5.0"
+    },
+    {
+      "name": "WiFi",
+      "frameworks": "arduino",
+      "platforms": "espressif32"
+    },
+    {
+      "name": "HTTPClient",
+      "frameworks": "arduino",
+      "platforms": "espressif32"
+    },
+    {
+      "name": "WebServer",
+      "frameworks": "arduino",
+      "platforms": "espressif32"
+    },
+    {
+      "name": "ArduinoOTA",
+      "frameworks": "arduino",
+      "platforms": "espressif32"
+    },
+    {
+      "name": "SPIFFS",
+      "frameworks": "arduino",
+      "platforms": "espressif32"
+    }
+  ],
+  "export": {
+    "include": [
+      "*.h",
+      "*.cpp",
+      "*.ino",
+      "examples/*",
+      "README.md",
+      "LICENSE",
+      "library.json"
+    ]
+  },
+  "examples": [
+    {
+      "name": "Basic",
+      "base": "examples/01_Basic",
+      "files": [
+        "basic_volt.ino"
+      ]
+    },
+    {
+      "name": "WiFi Test",
+      "base": "examples/02_WiFi_Test",
+      "files": [
+        "wifi_test.ino"
+      ]
+    },
+    {
+      "name": "Voice Test",
+      "base": "examples/03_Voice_Test",
+      "files": [
+        "voice_test.ino"
+      ]
+    },
+    {
+      "name": "Full Featured",
+      "base": "examples/04_Full_Featured",
+      "files": [
+        "README.md"
+      ]
+    },
+    {
+      "name": "Custom Personality",
+      "base": "examples/05_Custom_Personality",
+      "files": [
+        "custom_personality.ino"
+      ]
+    }
+  ]
+}

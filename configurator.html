@@ -1,0 +1,498 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>VOLT Watch Configurator</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+        
+        .container {
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+            max-width: 800px;
+            width: 100%;
+            padding: 40px;
+        }
+        
+        h1 {
+            color: #667eea;
+            margin-bottom: 10px;
+            font-size: 2.5em;
+        }
+        
+        .subtitle {
+            color: #666;
+            margin-bottom: 30px;
+            font-size: 1.1em;
+        }
+        
+        .section {
+            margin-bottom: 30px;
+            padding: 20px;
+            background: #f8f9fa;
+            border-radius: 10px;
+        }
+        
+        .section h2 {
+            color: #667eea;
+            margin-bottom: 15px;
+            font-size: 1.3em;
+            display: flex;
+            align-items: center;
+        }
+        
+        .section h2::before {
+            content: '';
+            display: inline-block;
+            width: 4px;
+            height: 24px;
+            background: #667eea;
+            margin-right: 10px;
+            border-radius: 2px;
+        }
+        
+        .form-group {
+            margin-bottom: 20px;
+        }
+        
+        label {
+            display: block;
+            margin-bottom: 8px;
+            color: #333;
+            font-weight: 500;
+        }
+        
+        input, select, textarea {
+            width: 100%;
+            padding: 12px;
+            border: 2px solid #e0e0e0;
+            border-radius: 8px;
+            font-size: 16px;
+            transition: border-color 0.3s;
+        }
+        
+        input:focus, select:focus, textarea:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+        
+        .help-text {
+            font-size: 0.9em;
+            color: #666;
+            margin-top: 5px;
+        }
+        
+        .button-group {
+            display: flex;
+            gap: 15px;
+            margin-top: 30px;
+        }
+        
+        button {
+            flex: 1;
+            padding: 15px 30px;
+            border: none;
+            border-radius: 8px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+        
+        .btn-primary {
+            background: #667eea;
+            color: white;
+        }
+        
+        .btn-primary:hover {
+            background: #5568d3;
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4);
+        }
+        
+        .btn-secondary {
+            background: #e0e0e0;
+            color: #333;
+        }
+        
+        .btn-secondary:hover {
+            background: #d0d0d0;
+        }
+        
+        .output-section {
+            display: none;
+            margin-top: 30px;
+            padding: 20px;
+            background: #f8f9fa;
+            border-radius: 10px;
+        }
+        
+        .output-section.show {
+            display: block;
+        }
+        
+        pre {
+            background: #2d2d2d;
+            color: #f8f8f2;
+            padding: 20px;
+            border-radius: 8px;
+            overflow-x: auto;
+            font-size: 14px;
+            line-height: 1.5;
+        }
+        
+        .success-message {
+            background: #d4edda;
+            color: #155724;
+            padding: 15px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            border-left: 4px solid #28a745;
+        }
+        
+        .voice-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 10px;
+        }
+        
+        .voice-option {
+            padding: 15px;
+            border: 2px solid #e0e0e0;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+        
+        .voice-option:hover {
+            border-color: #667eea;
+            background: #f0f4ff;
+        }
+        
+        .voice-option.selected {
+            border-color: #667eea;
+            background: #667eea;
+            color: white;
+        }
+        
+        .voice-name {
+            font-weight: 600;
+            margin-bottom: 5px;
+        }
+        
+        .voice-desc {
+            font-size: 0.9em;
+            opacity: 0.8;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>⚡ VOLT Watch Configurator</h1>
+        <p class="subtitle">Create your personalized config.h file in 2 minutes</p>
+        
+        <form id="configForm">
+            <!-- Section 1: Child Information -->
+            <div class="section">
+                <h2>👶 Child Information</h2>
+                <div class="form-group">
+                    <label for="childName">Child's Name *</label>
+                    <input type="text" id="childName" required placeholder="e.g., Emma">
+                    <div class="help-text">This will be used throughout VOLT's messages</div>
+                </div>
+                <div class="form-group">
+                    <label for="childAge">Child's Age *</label>
+                    <input type="number" id="childAge" required min="3" max="18" placeholder="e.g., 8">
+                    <div class="help-text">Helps VOLT use age-appropriate language</div>
+                </div>
+            </div>
+            
+            <!-- Section 2: WiFi Settings -->
+            <div class="section">
+                <h2>📶 WiFi Settings</h2>
+                <div class="form-group">
+                    <label for="wifiSSID">WiFi Network Name *</label>
+                    <input type="text" id="wifiSSID" required placeholder="e.g., Home-WiFi">
+                    <div class="help-text">Must be 2.4GHz WiFi (not 5GHz)</div>
+                </div>
+                <div class="form-group">
+                    <label for="wifiPassword">WiFi Password *</label>
+                    <input type="password" id="wifiPassword" required placeholder="Your WiFi password">
+                </div>
+                <div class="form-group">
+                    <label for="wifiSSID2">Backup WiFi Name (Optional)</label>
+                    <input type="text" id="wifiSSID2" placeholder="e.g., Work-WiFi">
+                </div>
+                <div class="form-group">
+                    <label for="wifiPassword2">Backup WiFi Password (Optional)</label>
+                    <input type="password" id="wifiPassword2" placeholder="Backup WiFi password">
+                </div>
+            </div>
+            
+            <!-- Section 3: OpenAI API Key -->
+            <div class="section">
+                <h2>🔑 OpenAI API Key</h2>
+                <div class="form-group">
+                    <label for="apiKey">API Key *</label>
+                    <input type="text" id="apiKey" required placeholder="sk-...">
+                    <div class="help-text">
+                        Get your key from <a href="https://platform.openai.com/api-keys" target="_blank">platform.openai.com/api-keys</a><br>
+                        Cost: Typically $0.01-0.05 per conversation
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Section 4: Voice Settings -->
+            <div class="section">
+                <h2>🎤 Voice Settings</h2>
+                <div class="form-group">
+                    <label>Choose VOLT's Voice *</label>
+                    <div class="voice-grid">
+                        <div class="voice-option selected" data-voice="echo">
+                            <div class="voice-name">Echo ⭐</div>
+                            <div class="voice-desc">Male, warm, conversational</div>
+                        </div>
+                        <div class="voice-option" data-voice="nova">
+                            <div class="voice-name">Nova</div>
+                            <div class="voice-desc">Female, bright, energetic</div>
+                        </div>
+                        <div class="voice-option" data-voice="fable">
+                            <div class="voice-name">Fable</div>
+                            <div class="voice-desc">Male, warm, storytelling</div>
+                        </div>
+                        <div class="voice-option" data-voice="shimmer">
+                            <div class="voice-name">Shimmer</div>
+                            <div class="voice-desc">Female, soft, gentle</div>
+                        </div>
+                        <div class="voice-option" data-voice="alloy">
+                            <div class="voice-name">Alloy</div>
+                            <div class="voice-desc">Neutral, smooth</div>
+                        </div>
+                        <div class="voice-option" data-voice="onyx">
+                            <div class="voice-name">Onyx</div>
+                            <div class="voice-desc">Male, deep, authoritative</div>
+                        </div>
+                    </div>
+                    <input type="hidden" id="ttsVoice" value="echo">
+                </div>
+                <div class="form-group">
+                    <label for="ttsSpeed">Voice Speed</label>
+                    <input type="number" id="ttsSpeed" value="1.08" min="0.25" max="4.0" step="0.1">
+                    <div class="help-text">1.0 = normal, 1.08 = slightly faster (recommended)</div>
+                </div>
+            </div>
+            
+            <!-- Section 5: Custom Messages -->
+            <div class="section">
+                <h2>💬 Custom Messages (Optional)</h2>
+                <div class="form-group">
+                    <label for="loveMessage">Love Message</label>
+                    <textarea id="loveMessage" rows="3" placeholder="Will be auto-generated if left blank"></textarea>
+                    <div class="help-text">Triggered by long button press</div>
+                </div>
+            </div>
+            
+            <div class="button-group">
+                <button type="submit" class="btn-primary">✨ Generate config.h</button>
+                <button type="reset" class="btn-secondary">🔄 Reset Form</button>
+            </div>
+        </form>
+        
+        <div id="outputSection" class="output-section">
+            <div class="success-message">
+                ✅ <strong>Success!</strong> Your config.h file is ready!
+            </div>
+            <h3>Preview:</h3>
+            <pre id="configOutput"></pre>
+            <div class="button-group">
+                <button id="downloadBtn" class="btn-primary">📥 Download config.h</button>
+                <button id="copyBtn" class="btn-secondary">📋 Copy to Clipboard</button>
+            </div>
+        </div>
+    </div>
+    
+    <script>
+        // Voice selection
+        document.querySelectorAll('.voice-option').forEach(option => {
+            option.addEventListener('click', function() {
+                document.querySelectorAll('.voice-option').forEach(o => o.classList.remove('selected'));
+                this.classList.add('selected');
+                document.getElementById('ttsVoice').value = this.dataset.voice;
+            });
+        });
+        
+        // Form submission
+        document.getElementById('configForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+            
+            const childName = document.getElementById('childName').value;
+            const childAge = document.getElementById('childAge').value;
+            const wifiSSID = document.getElementById('wifiSSID').value;
+            const wifiPassword = document.getElementById('wifiPassword').value;
+            const wifiSSID2 = document.getElementById('wifiSSID2').value;
+            const wifiPassword2 = document.getElementById('wifiPassword2').value;
+            const apiKey = document.getElementById('apiKey').value;
+            const ttsVoice = document.getElementById('ttsVoice').value;
+            const ttsSpeed = document.getElementById('ttsSpeed').value;
+            const loveMessage = document.getElementById('loveMessage').value || 
+                `💙 Dad loves you so much, ${childName}! You make every day brighter! 🌟`;
+            
+            const config = `// ============================================
+// VOLT AI Watch - Configuration
+// Generated by Web Configurator
+// ============================================
+
+#ifndef CONFIG_H
+#define CONFIG_H
+
+// ============================================
+// CHILD INFORMATION
+// ============================================
+const char* CHILD_NAME = "${childName}";
+const int CHILD_AGE = ${childAge};
+
+// ============================================
+// WIFI SETTINGS
+// ============================================
+const char* WIFI_SSID = "${wifiSSID}";
+const char* WIFI_PASSWORD = "${wifiPassword}";
+
+const char* WIFI_SSID_2 = "${wifiSSID2}";
+const char* WIFI_PASSWORD_2 = "${wifiPassword2}";
+
+const char* WIFI_SSID_3 = "";
+const char* WIFI_PASSWORD_3 = "";
+
+// ============================================
+// OPENAI API KEY
+// ============================================
+const char* OPENAI_API_KEY = "${apiKey}";
+
+// ============================================
+// VOICE SETTINGS
+// ============================================
+const char* TTS_VOICE = "${ttsVoice}";
+const float TTS_SPEED = ${ttsSpeed};
+
+// ============================================
+// PERSONALITY SETTINGS
+// ============================================
+const char* VOLT_PERSONALITY = 
+    "You are VOLT, a caring AI companion watch created by Dad. "
+    "You speak warmly and encouragingly to ${childName}. "
+    "Keep responses short (2-3 sentences max). "
+    "Be supportive, kind, and age-appropriate for a ${childAge} year old. "
+    "Use simple language and be positive.";
+
+// ============================================
+// CUSTOM MESSAGES
+// ============================================
+const char* LOVE_MESSAGE = "${loveMessage}";
+
+const char* MORNING_GREETING = 
+    "Good morning, ${childName}! Ready for an amazing day? ☀️";
+
+const char* BEDTIME_MESSAGE = 
+    "Sweet dreams, ${childName}! Dad loves you! 💙🌙";
+
+const char* OFFLINE_MESSAGE = 
+    "VOLT is offline right now. Try the breathing exercise or jokes! 😊";
+
+// ============================================
+// BUTTON BEHAVIOR
+// ============================================
+const bool ENABLE_VOICE_CHAT = true;
+const bool ENABLE_JOKES = true;
+const bool ENABLE_BREATHING = true;
+const bool ENABLE_LOVE_MESSAGE = true;
+const bool ENABLE_WIFI_SETUP = true;
+
+// ============================================
+// ADVANCED SETTINGS
+// ============================================
+const int WIFI_TIMEOUT = 20;
+const int MAX_RECORDING_TIME = 5;
+const int SLEEP_TIMEOUT = 5;
+const int DISPLAY_BRIGHTNESS = 200;
+
+const char* AI_MODEL = "gpt-4o-mini";
+const int MAX_TOKENS = 150;
+const float AI_TEMPERATURE = 0.7;
+
+const char* TTS_MODEL = "tts-1-hd";
+const char* STT_MODEL = "whisper-1";
+
+const char* WEB_PASSWORD = "volt2024";
+const char* AP_SSID_PREFIX = "VOLT-Setup-";
+const char* AP_PASSWORD = "volt2024";
+
+// ============================================
+// SAFETY SETTINGS
+// ============================================
+const bool ENABLE_CONTENT_FILTER = true;
+const bool BLOCK_VIOLENCE = true;
+const bool BLOCK_ADULT_CONTENT = true;
+const int MAX_CONVERSATION_TURNS = 10;
+
+#endif // CONFIG_H
+`;
+            
+            document.getElementById('configOutput').textContent = config;
+            document.getElementById('outputSection').classList.add('show');
+            document.getElementById('outputSection').scrollIntoView({ behavior: 'smooth' });
+            
+            // Store config for download
+            window.generatedConfig = config;
+        });
+        
+        // Download button
+        document.getElementById('downloadBtn').addEventListener('click', function() {
+            const blob = new Blob([window.generatedConfig], { type: 'text/plain' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = 'config.h';
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            URL.revokeObjectURL(url);
+        });
+        
+        // Copy button
+        document.getElementById('copyBtn').addEventListener('click', function() {
+            navigator.clipboard.writeText(window.generatedConfig).then(() => {
+                const btn = this;
+                const originalText = btn.textContent;
+                btn.textContent = '✅ Copied!';
+                setTimeout(() => {
+                    btn.textContent = originalText;
+                }, 2000);
+            });
+        });
+        
+        // Reset form
+        document.getElementById('configForm').addEventListener('reset', function() {
+            document.getElementById('outputSection').classList.remove('show');
+            document.querySelectorAll('.voice-option').forEach(o => o.classList.remove('selected'));
+            document.querySelector('.voice-option[data-voice="echo"]').classList.add('selected');
+            document.getElementById('ttsVoice').value = 'echo';
+        });
+    </script>
+</body>
+</html>
