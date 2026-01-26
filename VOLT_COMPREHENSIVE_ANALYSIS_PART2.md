@@ -903,7 +903,7 @@ public:
         }
 
         String choice = getVoiceResponse();
-        executecopingStrategy(choice, emotion);
+        executeCopingStrategy(choice, emotion);
     }
 
     void executeCopingStrategy(String choice, String emotion) {
