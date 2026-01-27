@@ -1,0 +1,402 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>VOLT Parental Dashboard</title>
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            background: #f5f5f5;
+        }
+        
+        .header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 20px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        
+        .header h1 {
+            font-size: 24px;
+            margin-bottom: 5px;
+        }
+        
+        .header p {
+            opacity: 0.9;
+            font-size: 14px;
+        }
+        
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        
+        .status-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+            margin-bottom: 20px;
+        }
+        
+        .status-card {
+            background: white;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+        }
+        
+        .status-card h3 {
+            font-size: 14px;
+            color: #666;
+            margin-bottom: 10px;
+        }
+        
+        .status-card .value {
+            font-size: 32px;
+            font-weight: bold;
+            color: #333;
+        }
+        
+        .status-card .unit {
+            font-size: 14px;
+            color: #999;
+        }
+        
+        .status-card.online .value {
+            color: #10b981;
+        }
+        
+        .status-card.warning .value {
+            color: #f59e0b;
+        }
+        
+        .status-card.critical .value {
+            color: #ef4444;
+        }
+        
+        .map-container {
+            background: white;
+            border-radius: 10px;
+            padding: 20px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+            margin-bottom: 20px;
+        }
+        
+        .map-container h2 {
+            margin-bottom: 15px;
+            color: #333;
+        }
+        
+        #map {
+            height: 400px;
+            border-radius: 8px;
+        }
+        
+        .activity-container {
+            background: white;
+            border-radius: 10px;
+            padding: 20px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+        }
+        
+        .activity-container h2 {
+            margin-bottom: 15px;
+            color: #333;
+        }
+        
+        .activity-list {
+            list-style: none;
+        }
+        
+        .activity-item {
+            padding: 15px;
+            border-bottom: 1px solid #eee;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .activity-item:last-child {
+            border-bottom: none;
+        }
+        
+        .activity-icon {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 20px;
+            margin-right: 15px;
+        }
+        
+        .activity-icon.sos {
+            background: #fee2e2;
+        }
+        
+        .activity-icon.location {
+            background: #dbeafe;
+        }
+        
+        .activity-icon.activity {
+            background: #d1fae5;
+        }
+        
+        .activity-info {
+            flex: 1;
+        }
+        
+        .activity-time {
+            color: #999;
+            font-size: 12px;
+        }
+        
+        .sos-alert {
+            background: #fee2e2;
+            border-left: 4px solid #ef4444;
+            padding: 15px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            display: none;
+        }
+        
+        .sos-alert.active {
+            display: block;
+        }
+        
+        .sos-alert h3 {
+            color: #991b1b;
+            margin-bottom: 5px;
+        }
+        
+        .btn {
+            background: #667eea;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 14px;
+            margin-top: 10px;
+        }
+        
+        .btn:hover {
+            background: #5568d3;
+        }
+        
+        .loading {
+            text-align: center;
+            padding: 40px;
+            color: #999;
+        }
+        
+        @media (max-width: 768px) {
+            .status-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <h1>🤖 VOLT Parental Dashboard</h1>
+        <p>Monitor your child's safety and activity in real-time</p>
+    </div>
+    
+    <div class="container">
+        <!-- SOS Alert -->
+        <div class="sos-alert" id="sosAlert">
+            <h3>🚨 SOS ALERT RECEIVED!</h3>
+            <p id="sosMessage">Your child has triggered an emergency alert.</p>
+            <button class="btn" onclick="acknowledgeAlert()">Acknowledge & View Location</button>
+        </div>
+        
+        <!-- Status Cards -->
+        <div class="status-grid">
+            <div class="status-card online">
+                <h3>Device Status</h3>
+                <div class="value" id="deviceStatus">●</div>
+                <div class="unit">Online</div>
+            </div>
+            
+            <div class="status-card">
+                <h3>Battery</h3>
+                <div class="value" id="battery">--</div>
+                <div class="unit">%</div>
+            </div>
+            
+            <div class="status-card">
+                <h3>Steps Today</h3>
+                <div class="value" id="steps">--</div>
+                <div class="unit">steps</div>
+            </div>
+            
+            <div class="status-card">
+                <h3>GPS Signal</h3>
+                <div class="value" id="gpsSignal">--</div>
+                <div class="unit">satellites</div>
+            </div>
+        </div>
+        
+        <!-- Map -->
+        <div class="map-container">
+            <h2>📍 Current Location</h2>
+            <div id="map"></div>
+            <p style="margin-top: 10px; color: #666; font-size: 14px;">
+                Last updated: <span id="lastUpdate">Never</span>
+            </p>
+        </div>
+        
+        <!-- Activity Log -->
+        <div class="activity-container">
+            <h2>📊 Recent Activity</h2>
+            <ul class="activity-list" id="activityList">
+                <li class="loading">Loading activity data...</li>
+            </ul>
+        </div>
+    </div>
+    
+    <script>
+        // Configuration
+        const API_ENDPOINT = 'https://your-api.com';
+        const DEVICE_ID = 'your-device-id';
+        const API_KEY = 'your-api-key';
+        
+        // Initialize map
+        let map = L.map('map').setView([0, 0], 13);
+        let marker = null;
+        
+        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+            attribution: '© OpenStreetMap contributors'
+        }).addTo(map);
+        
+        // Update device status
+        async function updateStatus() {
+            try {
+                // In production, this would fetch from your API
+                // For demo, using mock data
+                const mockData = {
+                    battery: 85,
+                    steps: 3247,
+                    gps_satellites: 8,
+                    location: {
+                        latitude: 37.7749,
+                        longitude: -122.4194,
+                        valid: true
+                    },
+                    online: true,
+                    last_update: new Date().toISOString()
+                };
+                
+                // Update status cards
+                document.getElementById('battery').textContent = mockData.battery;
+                document.getElementById('steps').textContent = mockData.steps.toLocaleString();
+                document.getElementById('gpsSignal').textContent = mockData.gps_satellites;
+                
+                // Update battery color
+                const batteryCard = document.getElementById('battery').closest('.status-card');
+                if (mockData.battery < 20) {
+                    batteryCard.classList.add('critical');
+                } else if (mockData.battery < 50) {
+                    batteryCard.classList.add('warning');
+                }
+                
+                // Update map
+                if (mockData.location.valid) {
+                    const lat = mockData.location.latitude;
+                    const lng = mockData.location.longitude;
+                    
+                    if (marker) {
+                        marker.setLatLng([lat, lng]);
+                    } else {
+                        marker = L.marker([lat, lng]).addTo(map);
+                        marker.bindPopup('<b>Current Location</b><br>Last seen here').openPopup();
+                    }
+                    
+                    map.setView([lat, lng], 15);
+                }
+                
+                // Update last update time
+                const lastUpdate = new Date(mockData.last_update);
+                document.getElementById('lastUpdate').textContent = lastUpdate.toLocaleString();
+                
+            } catch (error) {
+                console.error('Error updating status:', error);
+            }
+        }
+        
+        // Update activity log
+        async function updateActivity() {
+            try {
+                // Mock activity data
+                const activities = [
+                    { type: 'location', message: 'Location updated', time: '2 minutes ago', icon: '📍' },
+                    { type: 'activity', message: 'Reached 3000 steps', time: '15 minutes ago', icon: '👟' },
+                    { type: 'location', message: 'Arrived at school', time: '2 hours ago', icon: '🏫' },
+                    { type: 'activity', message: 'Started morning walk', time: '3 hours ago', icon: '🚶' }
+                ];
+                
+                const activityList = document.getElementById('activityList');
+                activityList.innerHTML = '';
+                
+                activities.forEach(activity => {
+                    const li = document.createElement('li');
+                    li.className = 'activity-item';
+                    li.innerHTML = `
+                        <div style="display: flex; align-items: center; flex: 1;">
+                            <div class="activity-icon ${activity.type}">
+                                ${activity.icon}
+                            </div>
+                            <div class="activity-info">
+                                <div>${activity.message}</div>
+                                <div class="activity-time">${activity.time}</div>
+                            </div>
+                        </div>
+                    `;
+                    activityList.appendChild(li);
+                });
+                
+            } catch (error) {
+                console.error('Error updating activity:', error);
+            }
+        }
+        
+        // Check for SOS alerts
+        async function checkSOSAlerts() {
+            // In production, this would check your API for SOS alerts
+            // For demo purposes, this is disabled
+            
+            // Example of showing SOS alert:
+            // document.getElementById('sosAlert').classList.add('active');
+            // document.getElementById('sosMessage').textContent = 'SOS alert received at 2:45 PM';
+        }
+        
+        function acknowledgeAlert() {
+            document.getElementById('sosAlert').classList.remove('active');
+            // In production, would send acknowledgment to API
+        }
+        
+        // Initialize dashboard
+        function init() {
+            updateStatus();
+            updateActivity();
+            checkSOSAlerts();
+            
+            // Update every 30 seconds
+            setInterval(updateStatus, 30000);
+            setInterval(updateActivity, 60000);
+            setInterval(checkSOSAlerts, 10000);
+        }
+        
+        // Start when
