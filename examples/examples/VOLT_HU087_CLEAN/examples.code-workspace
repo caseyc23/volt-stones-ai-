@@ -1,0 +1,40 @@
+{
+	"folders": [
+		{
+			"path": "../.."
+		},
+		{
+			"path": "../../../__pycache__"
+		},
+		{
+			"path": "../../../.vscode"
+		},
+		{
+			"path": "../../../.qodo"
+		},
+		{
+			"path": "../../../.pytest_cache"
+		},
+		{
+			"path": "../../../.mypy_cache"
+		},
+		{
+			"path": "../../../.history"
+		},
+		{
+			"path": "../../../.github"
+		},
+		{
+			"path": "../../../.devcontainer"
+		}
+	],
+	"settings": {
+		"powershell.cwd": ".github"
+	},
+	"extensions": {
+		"recommendations": [
+			"huggingface.huggingface-vscode",
+			"redhat.java"
+		]
+	}
+}
