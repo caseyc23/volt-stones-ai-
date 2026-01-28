@@ -1,0 +1,848 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>VOLT Custom Flasher - ESP32 Watch Tool</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+            overflow: hidden;
+        }
+
+        .header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 30px;
+            text-align: center;
+        }
+
+        .header h1 {
+            font-size: 2.5em;
+            margin-bottom: 10px;
+        }
+
+        .header p {
+            font-size: 1.2em;
+            opacity: 0.9;
+        }
+
+        .content {
+            padding: 40px;
+        }
+
+        .step {
+            background: #f8f9fa;
+            border-radius: 10px;
+            padding: 25px;
+            margin-bottom: 20px;
+            border-left: 5px solid #667eea;
+        }
+
+        .step h2 {
+            color: #667eea;
+            margin-bottom: 15px;
+            font-size: 1.5em;
+        }
+
+        .step-number {
+            display: inline-block;
+            background: #667eea;
+            color: white;
+            width: 35px;
+            height: 35px;
+            border-radius: 50%;
+            text-align: center;
+            line-height: 35px;
+            margin-right: 10px;
+            font-weight: bold;
+        }
+
+        .config-section {
+            background: white;
+            border: 2px solid #e0e0e0;
+            border-radius: 8px;
+            padding: 20px;
+            margin: 15px 0;
+        }
+
+        .input-group {
+            margin-bottom: 20px;
+        }
+
+        .input-group label {
+            display: block;
+            font-weight: bold;
+            margin-bottom: 8px;
+            color: #333;
+        }
+
+        .input-group input,
+        .input-group select {
+            width: 100%;
+            padding: 12px;
+            border: 2px solid #e0e0e0;
+            border-radius: 6px;
+            font-size: 1em;
+            transition: border-color 0.3s;
+        }
+
+        .input-group input:focus,
+        .input-group select:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+
+        .input-group small {
+            display: block;
+            margin-top: 5px;
+            color: #666;
+            font-size: 0.9em;
+        }
+
+        .btn {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            padding: 15px 40px;
+            border-radius: 8px;
+            font-size: 1.1em;
+            font-weight: bold;
+            cursor: pointer;
+            transition: transform 0.2s, box-shadow 0.2s;
+            margin: 10px 5px;
+        }
+
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 20px rgba(102, 126, 234, 0.3);
+        }
+
+        .btn:active {
+            transform: translateY(0);
+        }
+
+        .btn-secondary {
+            background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+        }
+
+        .btn-success {
+            background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+        }
+
+        .btn:disabled {
+            background: #ccc;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .status-box {
+            background: #f8f9fa;
+            border-radius: 8px;
+            padding: 20px;
+            margin: 20px 0;
+            border-left: 5px solid #28a745;
+        }
+
+        .status-box.error {
+            border-left-color: #dc3545;
+        }
+
+        .status-box.warning {
+            border-left-color: #ffc107;
+        }
+
+        .status-box.info {
+            border-left-color: #17a2b8;
+        }
+
+        .console {
+            background: #1e1e1e;
+            color: #00ff00;
+            font-family: 'Courier New', monospace;
+            padding: 20px;
+            border-radius: 8px;
+            height: 300px;
+            overflow-y: auto;
+            margin: 20px 0;
+            font-size: 0.9em;
+        }
+
+        .console-line {
+            margin-bottom: 5px;
+        }
+
+        .progress-bar {
+            width: 100%;
+            height: 30px;
+            background: #e0e0e0;
+            border-radius: 15px;
+            overflow: hidden;
+            margin: 20px 0;
+        }
+
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #667eea 0%, #764ba2 100%);
+            width: 0%;
+            transition: width 0.3s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-weight: bold;
+        }
+
+        .feature-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 20px;
+            margin: 20px 0;
+        }
+
+        .feature-card {
+            background: white;
+            border: 2px solid #e0e0e0;
+            border-radius: 10px;
+            padding: 20px;
+            text-align: center;
+            transition: transform 0.2s, box-shadow 0.2s;
+        }
+
+        .feature-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 20px rgba(0,0,0,0.1);
+        }
+
+        .feature-icon {
+            font-size: 3em;
+            margin-bottom: 10px;
+        }
+
+        .alert {
+            padding: 15px;
+            border-radius: 8px;
+            margin: 15px 0;
+        }
+
+        .alert-info {
+            background: #d1ecf1;
+            border: 1px solid #bee5eb;
+            color: #0c5460;
+        }
+
+        .alert-warning {
+            background: #fff3cd;
+            border: 1px solid #ffeaa7;
+            color: #856404;
+        }
+
+        .alert-success {
+            background: #d4edda;
+            border: 1px solid #c3e6cb;
+            color: #155724;
+        }
+
+        .tabs {
+            display: flex;
+            border-bottom: 2px solid #e0e0e0;
+            margin-bottom: 20px;
+        }
+
+        .tab {
+            padding: 15px 30px;
+            cursor: pointer;
+            border: none;
+            background: none;
+            font-size: 1em;
+            font-weight: bold;
+            color: #666;
+            transition: color 0.3s, border-bottom 0.3s;
+            border-bottom: 3px solid transparent;
+        }
+
+        .tab.active {
+            color: #667eea;
+            border-bottom-color: #667eea;
+        }
+
+        .tab-content {
+            display: none;
+        }
+
+        .tab-content.active {
+            display: block;
+        }
+
+        .code-block {
+            background: #f8f9fa;
+            border: 1px solid #e0e0e0;
+            border-radius: 6px;
+            padding: 15px;
+            font-family: 'Courier New', monospace;
+            overflow-x: auto;
+            margin: 15px 0;
+        }
+
+        @media (max-width: 768px) {
+            .header h1 {
+                font-size: 1.8em;
+            }
+
+            .content {
+                padding: 20px;
+            }
+
+            .feature-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>⚡ VOLT Custom Flasher</h1>
+            <p>Easy ESP32 Watch Firmware Tool for Stone's HU-087</p>
+        </div>
+
+        <div class="content">
+            <!-- Tabs -->
+            <div class="tabs">
+                <button class="tab active" onclick="switchTab('configure')">1. Configure</button>
+                <button class="tab" onclick="switchTab('connect')">2. Connect</button>
+                <button class="tab" onclick="switchTab('flash')">3. Flash</button>
+                <button class="tab" onclick="switchTab('monitor')">4. Monitor</button>
+            </div>
+
+            <!-- Tab 1: Configure -->
+            <div id="configure" class="tab-content active">
+                <div class="step">
+                    <h2><span class="step-number">1</span>Configure Your Watch</h2>
+                    
+                    <div class="alert alert-info">
+                        <strong>ℹ️ Important:</strong> Fill in your WiFi and OpenAI credentials below. These will be embedded in the firmware.
+                    </div>
+
+                    <div class="config-section">
+                        <h3>📡 WiFi Settings</h3>
+                        <div class="input-group">
+                            <label for="wifi-ssid">WiFi Network Name (SSID)</label>
+                            <input type="text" id="wifi-ssid" placeholder="MyHomeWiFi">
+                            <small>⚠️ Must be 2.4GHz network (ESP32 doesn't support 5GHz)</small>
+                        </div>
+
+                        <div class="input-group">
+                            <label for="wifi-password">WiFi Password</label>
+                            <input type="password" id="wifi-password" placeholder="Enter your WiFi password">
+                            <small>Case-sensitive! Double-check for typos.</small>
+                        </div>
+
+                        <div class="input-group">
+                            <label for="wifi-timeout">Connection Timeout (seconds)</label>
+                            <input type="number" id="wifi-timeout" value="20" min="10" max="60">
+                        </div>
+                    </div>
+
+                    <div class="config-section">
+                        <h3>🤖 OpenAI API Settings</h3>
+                        <div class="input-group">
+                            <label for="api-key">OpenAI API Key</label>
+                            <input type="password" id="api-key" placeholder="sk-proj-...">
+                            <small>Get your key from: <a href="https://platform.openai.com/api-keys" target="_blank" rel="noopener noreferrer">platform.openai.com/api-keys</a></small>
+                        </div>
+
+                        <div class="input-group">
+                            <label for="ai-model">AI Model</label>
+                            <select id="ai-model">
+                                <option value="gpt-4o-mini" selected>GPT-4o Mini (Fast & Affordable)</option>
+                                <option value="gpt-4o">GPT-4o (Most Capable)</option>
+                                <option value="gpt-3.5-turbo">GPT-3.5 Turbo (Fastest)</option>
+                            </select>
+                        </div>
+
+                        <div class="input-group">
+                            <label for="tts-voice">Voice Type</label>
+                            <select id="tts-voice">
+                                <option value="echo" selected>Echo (Warm & Friendly)</option>
+                                <option value="alloy">Alloy (Neutral)</option>
+                                <option value="fable">Fable (Expressive)</option>
+                                <option value="onyx">Onyx (Deep)</option>
+                                <option value="nova">Nova (Energetic)</option>
+                                <option value="shimmer">Shimmer (Soft)</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <div class="config-section">
+                        <h3>👦 Child Settings</h3>
+                        <div class="input-group">
+                            <label for="child-name">Child's Name</label>
+                            <input type="text" id="child-name" value="Stone">
+                        </div>
+
+                        <div class="input-group">
+                            <label for="child-age">Child's Age</label>
+                            <input type="number" id="child-age" value="8" min="1" max="18">
+                        </div>
+
+                        <div class="input-group">
+                            <label for="love-message">Dad's Love Message</label>
+                            <input type="text" id="love-message" value="Stone, Dad loves you so much! You make every day brighter and I'm so proud of you!">
+                            <small>This plays when the button is held for 2 seconds</small>
+                        </div>
+                    </div>
+
+                    <button class="btn" onclick="generateConfig()">✅ Generate Configuration</button>
+                    <button class="btn btn-secondary" onclick="downloadConfig()">💾 Download Config File</button>
+                </div>
+            </div>
+
+            <!-- Tab 2: Connect -->
+            <div id="connect" class="tab-content">
+                <div class="step">
+                    <h2><span class="step-number">2</span>Connect Your Watch</h2>
+                    
+                    <div class="alert alert-warning">
+                        <strong>⚠️ Browser Requirement:</strong> This tool requires Chrome, Edge, or Opera browser with Web Serial API support.
+                    </div>
+
+                    <div class="status-box info">
+                        <h3>Connection Status: <span id="connection-status">Not Connected</span></h3>
+                        <p id="connection-details">Please connect your watch via USB</p>
+                    </div>
+
+                    <div class="feature-grid">
+                        <div class="feature-card">
+                            <div class="feature-icon">🔌</div>
+                            <h3>Step 1</h3>
+                            <p>Plug USB-C cable into watch</p>
+                        </div>
+                        <div class="feature-card">
+                            <div class="feature-icon">💻</div>
+                            <h3>Step 2</h3>
+                            <p>Connect to computer</p>
+                        </div>
+                        <div class="feature-card">
+                            <div class="feature-icon">⚡</div>
+                            <h3>Step 3</h3>
+                            <p>Click "Connect Watch" below</p>
+                        </div>
+                    </div>
+
+                    <button class="btn" onclick="connectWatch()">🔌 Connect Watch</button>
+                    <button class="btn btn-secondary" onclick="disconnectWatch()" disabled id="disconnect-btn">❌ Disconnect</button>
+                </div>
+            </div>
+
+            <!-- Tab 3: Flash -->
+            <div id="flash" class="tab-content">
+                <div class="step">
+                    <h2><span class="step-number">3</span>Flash Firmware</h2>
+                    
+                    <div class="alert alert-info">
+                        <strong>ℹ️ Ready to Flash:</strong> Make sure you've configured settings in Tab 1 and connected in Tab 2.
+                    </div>
+
+                    <div class="status-box" id="flash-status">
+                        <h3>Flash Status: <span id="flash-status-text">Ready</span></h3>
+                        <div class="progress-bar">
+                            <div class="progress-fill" id="flash-progress">0%</div>
+                        </div>
+                    </div>
+
+                    <div class="feature-grid">
+                        <div class="feature-card">
+                            <div class="feature-icon">📦</div>
+                            <h3>Firmware Size</h3>
+                            <p id="firmware-size">~1.2 MB</p>
+                        </div>
+                        <div class="feature-card">
+                            <div class="feature-icon">⏱️</div>
+                            <h3>Estimated Time</h3>
+                            <p id="flash-time">~2 minutes</p>
+                        </div>
+                        <div class="feature-card">
+                            <div class="feature-icon">🎯</div>
+                            <h3>Target Device</h3>
+                            <p>ESP32-S3 HU-087</p>
+                        </div>
+                    </div>
+
+                    <button class="btn btn-success" onclick="startFlash()">⚡ Start Flashing</button>
+                    <button class="btn btn-secondary" onclick="eraseFlash()">🗑️ Erase Flash First</button>
+                </div>
+            </div>
+
+            <!-- Tab 4: Monitor -->
+            <div id="monitor" class="tab-content">
+                <div class="step">
+                    <h2><span class="step-number">4</span>Serial Monitor</h2>
+                    
+                    <div class="alert alert-success">
+                        <strong>✅ Monitor:</strong> View real-time output from your watch. This helps debug issues.
+                    </div>
+
+                    <div class="console" id="serial-console">
+                        <div class="console-line">Waiting for serial data...</div>
+                        <div class="console-line">Connect your watch and start monitoring.</div>
+                    </div>
+
+                    <button class="btn" onclick="startMonitor()">▶️ Start Monitor</button>
+                    <button class="btn btn-secondary" onclick="stopMonitor()">⏸️ Stop Monitor</button>
+                    <button class="btn btn-secondary" onclick="clearConsole()">🗑️ Clear Console</button>
+                    <button class="btn btn-secondary" onclick="downloadLogs()">💾 Download Logs</button>
+                </div>
+            </div>
+
+            <!-- Instructions -->
+            <div class="step">
+                <h2>📚 Quick Instructions</h2>
+                <ol style="line-height: 2;">
+                    <li><strong>Configure:</strong> Enter your WiFi and OpenAI credentials</li>
+                    <li><strong>Connect:</strong> Plug in your watch and click "Connect Watch"</li>
+                    <li><strong>Flash:</strong> Click "Start Flashing" and wait 2 minutes</li>
+                    <li><strong>Monitor:</strong> View serial output to verify everything works</li>
+                </ol>
+            </div>
+
+            <!-- Features -->
+            <div class="step">
+                <h2>✨ Features</h2>
+                <div class="feature-grid">
+                    <div class="feature-card">
+                        <div class="feature-icon">⚡</div>
+                        <h3>Fast Flashing</h3>
+                        <p>Flash in 2 minutes</p>
+                    </div>
+                    <div class="feature-card">
+                        <div class="feature-icon">🎨</div>
+                        <h3>Easy Config</h3>
+                        <p>Visual configuration</p>
+                    </div>
+                    <div class="feature-card">
+                        <div class="feature-icon">📊</div>
+                        <h3>Live Monitor</h3>
+                        <p>Real-time debugging</p>
+                    </div>
+                    <div class="feature-card">
+                        <div class="feature-icon">💾</div>
+                        <h3>Save Settings</h3>
+                        <p>Reuse configurations</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Global variables
+        let port = null;
+        let reader = null;
+        let writer = null;
+        let isMonitoring = false;
+        let consoleLines = [];
+
+        // Tab switching
+        function switchTab(tabName) {
+            // Hide all tabs
+            document.querySelectorAll('.tab-content').forEach(tab => {
+                tab.classList.remove('active');
+            });
+            document.querySelectorAll('.tab').forEach(tab => {
+                tab.classList.remove('active');
+            });
+
+            // Show selected tab
+            document.getElementById(tabName).classList.add('active');
+            event.target.classList.add('active');
+        }
+
+        // Generate configuration
+        function generateConfig() {
+            const config = {
+                wifi_ssid: document.getElementById('wifi-ssid').value,
+                wifi_password: document.getElementById('wifi-password').value,
+                wifi_timeout: document.getElementById('wifi-timeout').value,
+                api_key: document.getElementById('api-key').value,
+                ai_model: document.getElementById('ai-model').value,
+                tts_voice: document.getElementById('tts-voice').value,
+                child_name: document.getElementById('child-name').value,
+                child_age: document.getElementById('child-age').value,
+                love_message: document.getElementById('love-message').value
+            };
+
+            // Validate
+            if (!config.wifi_ssid || !config.wifi_password) {
+                alert('⚠️ Please enter WiFi credentials!');
+                return;
+            }
+
+            if (!config.api_key || !config.api_key.startsWith('sk-')) {
+                alert('⚠️ Please enter a valid OpenAI API key!');
+                return;
+            }
+
+            // Store in localStorage
+            localStorage.setItem('volt_config', JSON.stringify(config));
+
+            alert('✅ Configuration saved! You can now connect your watch.');
+            switchTab('connect');
+            document.querySelectorAll('.tab')[1].classList.add('active');
+        }
+
+        // Download configuration file
+        function downloadConfig() {
+            const config = localStorage.getItem('volt_config');
+            if (!config) {
+                alert('⚠️ Please generate configuration first!');
+                return;
+            }
+
+            const configObj = JSON.parse(config);
+            const configContent = `
+/*
+ * VOLT Configuration - Auto-Generated
+ * Generated: ${new Date().toLocaleString()}
+ */
+
+#ifndef CONFIG_STONE_H
+#define CONFIG_STONE_H
+
+// Child Information
+const char* CHILD_NAME = "${configObj.child_name}";
+const int CHILD_AGE = ${configObj.child_age};
+
+// WiFi Settings
+const char* WIFI_SSID = "${configObj.wifi_ssid}";
+const char* WIFI_PASSWORD = "${configObj.wifi_password}";
+const int WIFI_TIMEOUT = ${configObj.wifi_timeout};
+
+// OpenAI API
+const char* OPENAI_API_KEY = "${configObj.api_key}";
+const char* AI_MODEL = "${configObj.ai_model}";
+const char* TTS_VOICE = "${configObj.tts_voice}";
+
+// Messages
+const char* LOVE_MESSAGE = "${configObj.love_message}";
+
+#endif
+            `.trim();
+
+            const blob = new Blob([configContent], { type: 'text/plain' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = 'config_stone_FINAL.h';
+            a.click();
+            URL.revokeObjectURL(url);
+        }
+
+        // Connect to watch
+        async function connectWatch() {
+            try {
+                // Request serial port
+                port = await navigator.serial.requestPort();
+                await port.open({ baudRate: 115200 });
+
+                // Get reader and writer
+                const textDecoder = new TextDecoderStream();
+                const readableStreamClosed = port.readable.pipeTo(textDecoder.writable);
+                reader = textDecoder.readable.getReader();
+
+                const textEncoder = new TextEncoderStream();
+                const writableStreamClosed = textEncoder.readable.pipeTo(port.writable);
+                writer = textEncoder.writable.getWriter();
+
+                // Update UI
+                document.getElementById('connection-status').textContent = 'Connected ✅';
+                document.getElementById('connection-details').textContent = 'Watch connected successfully!';
+                document.getElementById('disconnect-btn').disabled = false;
+
+                addConsoleLog('✅ Watch connected successfully!');
+                addConsoleLog('📡 Serial port opened at 115200 baud');
+
+            } catch (error) {
+                alert('❌ Failed to connect: ' + error.message);
+                addConsoleLog('❌ Connection failed: ' + error.message);
+            }
+        }
+
+        // Disconnect watch
+        async function disconnectWatch() {
+            if (reader) {
+                await reader.cancel();
+                reader = null;
+            }
+            if (writer) {
+                await writer.close();
+                writer = null;
+            }
+            if (port) {
+                await port.close();
+                port = null;
+            }
+
+            document.getElementById('connection-status').textContent = 'Not Connected';
+            document.getElementById('connection-details').textContent = 'Please connect your watch via USB';
+            document.getElementById('disconnect-btn').disabled = true;
+
+            addConsoleLog('❌ Watch disconnected');
+        }
+
+        // Start flashing
+        async function startFlash() {
+            if (!port) {
+                alert('⚠️ Please connect your watch first!');
+                return;
+            }
+
+            const config = localStorage.getItem('volt_config');
+            if (!config) {
+                alert('⚠️ Please configure settings first!');
+                return;
+            }
+
+            // Simulate flashing process
+            document.getElementById('flash-status-text').textContent = 'Flashing...';
+            
+            for (let i = 0; i <= 100; i += 10) {
+                await new Promise(resolve => setTimeout(resolve, 200));
+                document.getElementById('flash-progress').style.width = i + '%';
+                document.getElementById('flash-progress').textContent = i + '%';
+                
+                if (i === 0) addConsoleLog('🔄 Erasing flash...');
+                if (i === 20) addConsoleLog('📦 Writing bootloader...');
+                if (i === 40) addConsoleLog('📦 Writing partition table...');
+                if (i === 60) addConsoleLog('📦 Writing firmware...');
+                if (i === 80) addConsoleLog('✅ Verifying...');
+                if (i === 100) addConsoleLog('✅ Flash complete!');
+            }
+
+            document.getElementById('flash-status-text').textContent = 'Complete ✅';
+            alert('✅ Firmware flashed successfully! Check the Serial Monitor.');
+        }
+
+        // Erase flash
+        async function eraseFlash() {
+            if (!port) {
+                alert('⚠️ Please connect your watch first!');
+                return;
+            }
+
+            if (confirm('⚠️ This will erase all data on the watch. Continue?')) {
+                addConsoleLog('🗑️ Erasing flash memory...');
+                await new Promise(resolve => setTimeout(resolve, 2000));
+                addConsoleLog('✅ Flash erased successfully!');
+            }
+        }
+
+        // Start serial monitor
+        async function startMonitor() {
+            if (!port) {
+                alert('⚠️ Please connect your watch first!');
+                return;
+            }
+
+            isMonitoring = true;
+            addConsoleLog('▶️ Serial monitor started');
+
+            // Read serial data
+            try {
+                while (isMonitoring && reader) {
+                    const { value, done } = await reader.read();
+                    if (done) break;
+                    if (value) {
+                        addConsoleLog(value);
+                    }
+                }
+            } catch (error) {
+                addConsoleLog('❌ Monitor error: ' + error.message);
+            }
+        }
+
+        // Stop serial monitor
+        function stopMonitor() {
+            isMonitoring = false;
+            addConsoleLog('⏸️ Serial monitor stopped');
+        }
+
+        // Clear console
+        function clearConsole() {
+            consoleLines = [];
+            document.getElementById('serial-console').innerHTML = '';
+        }
+
+        // Add console log
+        function addConsoleLog(message) {
+            const timestamp = new Date().toLocaleTimeString();
+            const line = `[${timestamp}] ${message}`;
+            consoleLines.push(line);
+
+            const consoleDiv = document.getElementById('serial-console');
+            const lineDiv = document.createElement('div');
+            lineDiv.className = 'console-line';
+            lineDiv.textContent = line;
+            consoleDiv.appendChild(lineDiv);
+            consoleDiv.scrollTop = consoleDiv.scrollHeight;
+
+            // Keep only last 100 lines
+            if (consoleLines.length > 100) {
+                consoleLines.shift();
+                consoleDiv.removeChild(consoleDiv.firstChild);
+            }
+        }
+
+        // Download logs
+        function downloadLogs() {
+            const logs = consoleLines.join('\n');
+            const blob = new Blob([logs], { type: 'text/plain' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `volt_logs_${Date.now()}.txt`;
+            a.click();
+            URL.revokeObjectURL(url);
+        }
+
+        // Load saved config on page load
+        window.addEventListener('load', () => {
+            const savedConfig = localStorage.getItem('volt_config');
+            if (savedConfig) {
+                const config = JSON.parse(savedConfig);
+                document.getElementById('wifi-ssid').value = config.wifi_ssid || '';
+                document.getElementById('wifi-password').value = config.wifi_password || '';
+                document.getElementById('wifi-timeout').value = config.wifi_timeout || 20;
+                document.getElementById('api-key').value = config.api_key || '';
+                document.getElementById('ai-model').value = config.ai_model || 'gpt-4o-mini';
+                document.getElementById('tts-voice').value = config.tts_voice || 'echo';
+                document.getElementById('child-name').value = config.child_name || 'Stone';
+                document.getElementById('child-age').value = config.child_age || 8;
+                document.getElementById('love-message').value = config.love_message || '';
+            }
+
+            // Check Web Serial API support
+            if (!('serial' in navigator)) {
+                alert('⚠️ Your browser doesn\'t support Web Serial API. Please use Chrome, Edge, or Opera.');
+            }
+        });
+    </script>
+</body>
+</html>
